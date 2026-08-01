@@ -1,0 +1,424 @@
+<!DOCTYPE html>
+<html lang="el">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Panathinaikos BC Calendar</title>
+  
+  <!-- Εξωτερικό αρχείο δεδομένων -->
+  <script src="data.js"></script>
+
+  <!-- Tailwind CSS (CDN) -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  
+  <!-- React & ReactDOM (CDN) -->
+  <script src="https://unpkg.com/react@18/umd/react.production.min.js" crossorigin></script>
+  <script src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js" crossorigin></script>
+  
+  <!-- Babel for JSX (CDN) -->
+  <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+
+  <style>
+    body { font-family: system-ui, -apple-system, sans-serif; }
+    
+    /* Απλά animations για το modal */
+    .modal-overlay {
+      animation: fadeIn 0.2s ease-out forwards;
+    }
+    .modal-content {
+      animation: slideUp 0.2s ease-out forwards;
+    }
+    @keyframes fadeIn {
+      from { opacity: 0; }
+      to { opacity: 1; }
+    }
+    @keyframes slideUp {
+      from { opacity: 0; transform: scale(0.95) translateY(10px); }
+      to { opacity: 1; transform: scale(1) translateY(0); }
+    }
+  </style>
+</head>
+<body class="bg-gray-50/50 selection:bg-green-200 text-gray-900">
+  <div id="root"></div>
+
+  <!-- ΟΛΟΚΛΗΡΗ Η ΕΦΑΡΜΟΓΗ (React Code & UI) -->
+  <script type="text/babel">
+    const { useState, useMemo } = React;
+
+    const APP_VERSION = "v1.0.0";
+    const TEAM_NAME = "PANATHINAIKOS AKTOR ATHENS";
+
+    // --- 1. ΒΟΗΘΗΤΙΚΕΣ ΣΥΝΑΡΤΗΣΕΙΣ ---
+    function parseDateString(dateStr) {
+      const [day, month, year] = dateStr.split('/');
+      // Υποθέτουμε ότι το YY αναφέρεται στη δεκαετία του 2020 (π.χ. '26' -> 2026)
+      return new Date(2000 + parseInt(year, 10), parseInt(month, 10) - 1, parseInt(day, 10));
+    }
+
+    function isSameDay(date1, date2) {
+      return (
+        date1.getFullYear() === date2.getFullYear() &&
+        date1.getMonth() === date2.getMonth() &&
+        date1.getDate() === date2.getDate()
+      );
+    }
+
+    function getDaysInMonth(year, month) {
+      return new Date(year, month + 1, 0).getDate();
+    }
+
+    function getFirstDayOfMonth(year, month) {
+      return new Date(year, month, 1).getDay();
+    }
+
+    const monthNames = [
+      "Ιανουάριος", "Φεβρουάριος", "Μάρτιος", "Απρίλιος", "Μάιος", "Ιούνιος",
+      "Ιούλιος", "Αύγουστος", "Σεπτέμβριος", "Οκτώβριος", "Νοέμβριος", "Δεκέμβριος"
+    ];
+
+    const weekDays = ["Κυρ", "Δευ", "Τρι", "Τετ", "Πεμ", "Παρ", "Σαβ"];
+
+
+    // --- 2. INLINE SVG ΕΙΚΟΝΙΔΙΑ ---
+    const TrophyIcon = ({ className }) => (
+      <svg className={className} xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M6 9H4.5a2.5 2.5 0 0 1 0-5H6"/><path d="M18 9h1.5a2.5 2.5 0 0 0 0-5H18"/><path d="M4 22h16"/><path d="M10 14.66V17c0 .55-.47.98-.97 1.21C7.85 18.75 7 20.24 7 22"/><path d="M14 14.66V17c0 .55.47.98.97 1.21C16.15 18.75 17 20.24 17 22"/><path d="M18 2H6v7c0 3.31 2.69 6 6 6s6-2.69 6-6V2Z"/></svg>
+    );
+
+    const CalendarIcon = ({ className }) => (
+      <svg className={className} xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M8 2v4"/><path d="M16 2v4"/><rect width="18" height="18" x="3" y="4" rx="2"/><path d="M3 10h18"/><path d="M8 14h.01"/><path d="M12 14h.01"/><path d="M16 14h.01"/><path d="M8 18h.01"/><path d="M12 18h.01"/><path d="M16 18h.01"/></svg>
+    );
+
+    const XIcon = ({ className }) => (
+      <svg className={className} xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M18 6 6 18"/><path d="m6 6 12 12"/></svg>
+    );
+
+    const SettingsIcon = ({ className }) => (
+      <svg className={className} xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M12.22 2h-.44a2 2 0 0 0-2 2v.18a2 2 0 0 1-1 1.73l-.43.25a2 2 0 0 1-2 0l-.15-.08a2 2 0 0 0-2.73.73l-.22.38a2 2 0 0 0 .73 2.73l.15.1a2 2 0 0 1 1 1.72v.51a2 2 0 0 1-1 1.74l-.15.09a2 2 0 0 0-.73 2.73l.22.38a2 2 0 0 0 2.73.73l.15-.08a2 2 0 0 1 2 0l.43.25a2 2 0 0 1 1 1.73V20a2 2 0 0 0 2 2h.44a2 2 0 0 0 2-2v-.18a2 2 0 0 1 1-1.73l.43-.25a2 2 0 0 1 2 0l.15.08a2 2 0 0 0 2.73-.73l.22-.39a2 2 0 0 0-.73-2.73l-.15-.08a2 2 0 0 1-1-1.74v-.5a2 2 0 0 1 1-1.74l.15-.09a2 2 0 0 0 .73-2.73l-.22-.38a2 2 0 0 0-2.73-.73l-.15.08a2 2 0 0 1-2 0l-.43-.25a2 2 0 0 1-1-1.73V4a2 2 0 0 0-2-2z"/><circle cx="12" cy="12" r="3"/></svg>
+    );
+
+
+    // --- 3. ΕΠΙΜΕΡΟΥΣ COMPONENTS ---
+
+    // Component: Architect Modal
+    function ArchitectModal({ isOpen, onClose }) {
+      if (!isOpen) return null;
+
+      return (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm modal-overlay" onClick={onClose}>
+          <div 
+            className="w-full max-w-sm overflow-hidden bg-white rounded-2xl shadow-2xl modal-content"
+            onClick={e => e.stopPropagation()}
+          >
+            <div className="relative p-6 text-center bg-gray-900 text-white">
+              <h2 className="text-xl font-bold tracking-widest uppercase text-gray-300">Program Architect</h2>
+              <button
+                onClick={onClose}
+                className="absolute top-4 right-4 p-1 transition-colors rounded-full hover:bg-white/20 text-gray-400 hover:text-white"
+                aria-label="Κλείσιμο"
+              >
+                <XIcon className="w-5 h-5" />
+              </button>
+            </div>
+            
+            <div className="p-8 text-center space-y-4">
+              <div className="text-2xl font-extrabold text-gray-800">
+                George Petrakis
+              </div>
+              <div className="inline-flex items-center justify-center px-4 py-1.5 text-sm font-semibold text-green-800 bg-green-100 rounded-full border border-green-200">
+                Έκδοση {APP_VERSION}
+              </div>
+            </div>
+
+            <div className="p-4 bg-gray-50 text-center">
+              <button 
+                onClick={onClose}
+                className="w-full py-2.5 px-4 font-medium text-white transition-colors bg-gray-800 rounded-lg hover:bg-gray-900"
+              >
+                Κλείσιμο
+              </button>
+            </div>
+          </div>
+        </div>
+      );
+    }
+
+    // Component: Modal Λεπτομερειών Αγώνα
+    function MatchModal({ match, isOpen, onClose }) {
+      if (!match || !isOpen) return null;
+
+      const isHome = match.team1 === TEAM_NAME;
+
+      return (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm modal-overlay" onClick={onClose}>
+          <div 
+            className="w-full max-w-md overflow-hidden bg-white rounded-2xl shadow-2xl modal-content"
+            onClick={e => e.stopPropagation()}
+          >
+            {/* Header */}
+            <div className={`relative flex items-center justify-between p-6 text-white bg-green-700`}>
+              <div className="flex items-center gap-2">
+                <CalendarIcon className="w-5 h-5 opacity-80" />
+                <h2 className="text-xl font-bold tracking-tight">{match.date}</h2>
+              </div>
+              <button
+                onClick={onClose}
+                className="p-1 transition-colors rounded-full hover:bg-white/20"
+                aria-label="Κλείσιμο"
+              >
+                <XIcon className="w-6 h-6" />
+              </button>
+            </div>
+
+            {/* Content */}
+            <div className="p-6 space-y-6">
+              {/* Ομάδες */}
+              {match.team1 && match.team2 ? (
+                <div className="flex flex-col items-center justify-center gap-4 text-center">
+                  <div className={`w-full p-4 font-semibold rounded-xl border-2 ${match.team1 === TEAM_NAME ? 'bg-green-50 text-green-900 border-green-200' : 'bg-gray-50 text-gray-900 border-gray-200'}`}>
+                    {match.team1}
+                  </div>
+                  <div className="text-sm font-bold text-gray-400 uppercase tracking-widest">
+                    VS
+                  </div>
+                  <div className={`w-full p-4 font-semibold rounded-xl border-2 ${match.team2 === TEAM_NAME ? 'bg-green-50 text-green-900 border-green-200' : 'bg-gray-50 text-gray-900 border-gray-200'}`}>
+                    {match.team2}
+                  </div>
+                </div>
+              ) : (
+                <div className="flex flex-col items-center justify-center py-6 text-center">
+                  <div className="w-full p-4 text-lg font-bold text-green-900 bg-green-50 rounded-xl border-2 border-green-200">
+                    {TEAM_NAME}
+                  </div>
+                  <div className="mt-4 text-sm font-medium text-gray-500">
+                    (Αναμένεται Αντίπαλος)
+                  </div>
+                </div>
+              )}
+
+              {/* Διοργάνωση & Έδρα */}
+              <div className="flex items-center justify-between pt-4 mt-2 border-t border-gray-100">
+                <div className="flex items-center gap-2 text-gray-600">
+                  <TrophyIcon className="w-5 h-5 text-green-600" />
+                  <span className="font-medium">{match.competition}</span>
+                </div>
+                {match.team1 && match.team2 && (
+                  <div className="flex items-center gap-2">
+                    <span className="text-xl">{isHome ? '🏠' : '✈️'}</span>
+                    <div className={`text-sm font-bold px-3 py-1 rounded-full ${isHome ? 'bg-green-100 text-green-800' : 'bg-gray-100 text-gray-800'}`}>
+                      {isHome ? 'ΕΝΤΟΣ ΕΔΡΑΣ' : 'ΕΚΤΟΣ ΕΔΡΑΣ'}
+                    </div>
+                  </div>
+                )}
+              </div>
+            </div>
+            
+            {/* Footer */}
+            <div className="p-4 bg-gray-50 text-center">
+              <button 
+                onClick={onClose}
+                className="w-full py-2.5 px-4 font-medium text-white transition-colors bg-green-700 rounded-lg hover:bg-green-800"
+              >
+                Κλείσιμο
+              </button>
+            </div>
+          </div>
+        </div>
+      );
+    }
+
+    // Component: Προβολή ενός μεμονωμένου Μήνα
+    function MonthView({ year, month, matches, onMatchClick }) {
+      const daysInMonth = getDaysInMonth(year, month);
+      const firstDay = getFirstDayOfMonth(year, month);
+
+      const blanks = Array.from({ length: firstDay }, (_, i) => i);
+      const days = Array.from({ length: daysInMonth }, (_, i) => i + 1);
+
+      return (
+        <div className="flex flex-col p-4 transition-shadow bg-white border border-gray-100 shadow-sm rounded-2xl hover:shadow-md">
+          <div className="mb-4 text-center">
+            <h3 className="text-lg font-bold text-gray-800">
+              {monthNames[month]} {year}
+            </h3>
+          </div>
+
+          <div className="grid grid-cols-7 gap-2 mb-2">
+            {weekDays.map((day) => (
+              <div key={day} className="text-xs font-semibold text-center text-gray-400">
+                {day}
+              </div>
+            ))}
+          </div>
+
+          <div className="grid grid-cols-7 gap-2">
+            {blanks.map((blank) => (
+              <div key={`blank-${blank}`} className="w-8 h-8 md:w-10 md:h-10"></div>
+            ))}
+
+            {days.map((day) => {
+              const currentDate = new Date(year, month, day);
+              
+              const matchToday = matches.find(m => {
+                const matchDate = parseDateString(m.date);
+                return isSameDay(matchDate, currentDate);
+              });
+
+              const isMatchDay = !!matchToday;
+              const hasTeams = isMatchDay && !!matchToday.team1 && !!matchToday.team2;
+              const isHome = hasTeams && matchToday.team1 === TEAM_NAME;
+
+              let buttonClass = "relative flex items-center justify-center w-8 h-8 md:w-10 md:h-10 text-sm rounded-xl transition-all mx-auto ";
+
+              if (isMatchDay) {
+                buttonClass += "bg-green-700 text-white font-bold hover:bg-green-800 shadow-sm hover:shadow-md cursor-pointer hover:scale-110 z-10";
+              } else {
+                buttonClass += "text-gray-600 hover:bg-gray-100 cursor-default";
+              }
+
+              return (
+                <button
+                  key={day}
+                  onClick={() => isMatchDay && onMatchClick(matchToday)}
+                  disabled={!isMatchDay}
+                  className={buttonClass}
+                  aria-label={isMatchDay ? `Αγώνας: ${day} ${monthNames[month]}` : `${day} ${monthNames[month]}`}
+                  title={isMatchDay ? (hasTeams ? `${matchToday.team1} vs ${matchToday.team2}` : matchToday.competition) : ""}
+                >
+                  {day}
+                  {hasTeams && (
+                    <span className="absolute -top-1.5 -right-1.5 text-xs bg-white text-black shadow-sm rounded-full w-5 h-5 flex items-center justify-center border border-gray-100 z-20">
+                      {isHome ? '🏠' : '✈️'}
+                    </span>
+                  )}
+                </button>
+              );
+            })}
+          </div>
+        </div>
+      );
+    }
+
+
+    // --- 4. ΚΥΡΙΟ APPLICATION (MAIN APP) ---
+    function App() {
+      const [selectedMatch, setSelectedMatch] = useState(null);
+      const [isArchitectModalOpen, setIsArchitectModalOpen] = useState(false);
+
+      // Parsing του CSV από το αρχείο data.js
+      const parsedMatches = useMemo(() => {
+        if (typeof MATCHES_CSV === 'undefined') return [];
+        return MATCHES_CSV.trim().split('\n').map(line => {
+          const parts = line.split(',');
+          const date = parts[0];
+          const team1 = parts[1];
+          const team2 = parts[2];
+          // Σε περίπτωση που η διοργάνωση περιέχει κόμματα, ενώνουμε τα υπόλοιπα κομμάτια
+          const competition = parts.slice(3).join(',');
+          return { 
+            date: date?.trim(), 
+            team1: team1?.trim(), 
+            team2: team2?.trim(), 
+            competition: competition?.trim() 
+          };
+        }).filter(m => m.date); // Φιλτράρουμε κενές γραμμές
+      }, []);
+
+      // Εύρος μηνών που θέλουμε να απεικονίσουμε (Αυγ 2026 - Ιουλ 2027)
+      const monthsToRender = [
+        { year: 2026, month: 7 },  // Αυγ 2026
+        { year: 2026, month: 8 },
+        { year: 2026, month: 9 },
+        { year: 2026, month: 10 },
+        { year: 2026, month: 11 },
+        { year: 2027, month: 0 },  // Ιαν 2027
+        { year: 2027, month: 1 },
+        { year: 2027, month: 2 },
+        { year: 2027, month: 3 },
+        { year: 2027, month: 4 },
+        { year: 2027, month: 5 },
+        { year: 2027, month: 6 },  // Ιουλ 2027
+      ];
+
+      return (
+        <div>
+          <header className="sticky top-0 z-30 px-4 py-6 bg-white/80 border-b border-gray-100 backdrop-blur-md shadow-sm">
+            <div className="max-w-7xl mx-auto flex items-center justify-between">
+              <div className="flex items-center gap-3">
+                <div className="p-2 bg-green-700 text-white rounded-xl shadow-sm">
+                  <TrophyIcon className="w-6 h-6" />
+                </div>
+                <div>
+                  <h1 className="text-2xl font-extrabold tracking-tight text-gray-900">
+                    Panathinaikos BC
+                  </h1>
+                  <p className="text-sm font-medium text-green-700">
+                    Πρόγραμμα Αγώνων 2026 - 2027
+                  </p>
+                </div>
+              </div>
+              <button
+                onClick={() => setIsArchitectModalOpen(true)}
+                className="p-2 text-gray-400 transition-colors bg-white border border-gray-200 rounded-full hover:bg-gray-50 hover:text-gray-600 focus:outline-none focus:ring-2 focus:ring-green-500 shadow-sm"
+                aria-label="Πληροφορίες προγράμματος"
+              >
+                <SettingsIcon className="w-5 h-5" />
+              </button>
+            </div>
+          </header>
+
+          <main className="max-w-7xl mx-auto px-4 py-12">
+            <div className="mb-8 text-center max-w-2xl mx-auto">
+              <h2 className="text-3xl font-bold text-gray-900 mb-4">Επίσημο Ημερολόγιο</h2>
+              <p className="text-gray-600 mb-6">
+                Δείτε το πρόγραμμα αγώνων της ομάδας μας. Κάντε κλικ σε μία ημερομηνία για να δείτε τις λεπτομέρειες του αγώνα.
+              </p>
+              
+              {/* Υπόμνημα (Legend) */}
+              <div className="flex flex-wrap items-center justify-center gap-6 px-5 py-3 bg-white border border-gray-200 rounded-full shadow-sm w-fit mx-auto">
+                <div className="flex items-center gap-2 text-sm font-medium text-gray-700">
+                  <span className="flex items-center justify-center w-7 h-7 text-sm bg-white border border-gray-200 shadow-sm rounded-full">🏠</span>
+                  <span>Εντός Έδρας</span>
+                </div>
+                <div className="flex items-center gap-2 text-sm font-medium text-gray-700">
+                  <span className="flex items-center justify-center w-7 h-7 text-sm bg-white border border-gray-200 shadow-sm rounded-full">✈️</span>
+                  <span>Εκτός Έδρας</span>
+                </div>
+              </div>
+            </div>
+
+            <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
+              {monthsToRender.map((m, index) => (
+                <MonthView
+                  key={index}
+                  year={m.year}
+                  month={m.month}
+                  matches={parsedMatches}
+                  onMatchClick={setSelectedMatch}
+                />
+              ))}
+            </div>
+          </main>
+          
+          <footer className="py-8 border-t border-gray-100 bg-white">
+          </footer>
+
+          <MatchModal 
+            match={selectedMatch} 
+            isOpen={!!selectedMatch} 
+            onClose={() => setSelectedMatch(null)} 
+          />
+          
+          <ArchitectModal 
+            isOpen={isArchitectModalOpen} 
+            onClose={() => setIsArchitectModalOpen(false)} 
+          />
+        </div>
+      );
+    }
+
+    // --- 5. RENDER ΣΤΗ ΣΕΛΙΔΑ ---
+    const root = ReactDOM.createRoot(document.getElementById('root'));
+    root.render(<App />);
+  </script>
+</body>
+</html>
