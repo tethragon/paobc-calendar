@@ -40,8 +40,7 @@ const MATCHES_CSV = `24/09/26,PANATHINAIKOS AKTOR ATHENS,PARIS BASKETBALL,EL
 15/04/27,PANATHINAIKOS AKTOR ATHENS,REAL MADRID,EL
 26/9/26,,,Super Cup στη Ρόδο με συμμετοχή Ολυμπιακός, Παναθηναϊκός, ΑΕΚ, ΠΑΟΚ
 27/9/26,,,Super Cup στη Ρόδο με συμμετοχή Ολυμπιακός, Παναθηναϊκός, ΑΕΚ, ΠΑΟΚ
-11/9/26,,,2ο International Tournament Rhodes 2026 με συμμετοχή Παναθηναϊκού,Α.Ε.Κ.,Σπάρτακ Σουμπότιτσα
-12/9/26,,,2ο International Tournament Rhodes 2026 με συμμετοχή Παναθηναϊκού,Α.Ε.Κ.,Σπάρτακ Σουμπότιτσα
-13/9/26,,,2ο International Tournament Rhodes 2026 με συμμετοχή Παναθηναϊκού,Α.Ε.Κ.,Σπάρτακ Σουμπότιτσα
+11/9/26,PANATHINAIKOS AKTOR ATHENS,ΑΕΚ,2ο International Tournament Rhodes 2026 με συμμετοχή Παναθηναϊκού,Α.Ε.Κ.,Σπάρτακ Σουμπότιτσα βλ. https://tinyurl.com/5yryszpa
+12/9/26,PANATHINAIKOS AKTOR ATHENS,Σπαρτάκ Σουμπότιτσα,2ο International Tournament Rhodes 2026 με συμμετοχή Παναθηναϊκού,Α.Ε.Κ.,Σπάρτακ Σουμπότιτσα βλ. βλ. https://tinyurl.com/5yryszpa
 18/9/26,PANATHINAIKOS AKTOR ATHENS,Μπουργκ,Τουρνουά «Παύλος Γιαννακόπουλος» με συμμετοχή Παναθηναϊκού,Παρτίζαν,ΠΑΟΚ,Μπουργκ
 19/9/26,PANATHINAIKOS AKTOR ATHENS,ΠΑΟΚ,Τουρνουά «Παύλος Γιαννακόπουλος» με συμμετοχή Παναθηναϊκού,Παρτίζαν,ΠΑΟΚ,Μπουργκ`;
