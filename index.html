@@ -203,9 +203,9 @@
 
               {/* Διοργάνωση & Έδρα */}
               <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 pt-4 mt-2 border-t border-gray-100">
-                <div className="flex items-start sm:items-center gap-2 text-gray-600">
+                <div className="flex items-start sm:items-center gap-2 text-gray-600 w-full sm:w-auto min-w-0">
                   <TrophyIcon className="w-5 h-5 text-green-600 shrink-0 mt-0.5 sm:mt-0" />
-                  <span className="font-medium text-left">{match.competition}</span>
+                  <span className="font-medium text-left break-words flex-1 min-w-0">{match.competition}</span>
                 </div>
                 {match.team1 && match.team2 && (
                   <div className="flex items-center gap-2 shrink-0">
