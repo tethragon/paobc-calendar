@@ -51,7 +51,7 @@
   <script type="text/babel">
     const { useState, useMemo } = React;
 
-    const APP_VERSION = "v1.4b.20260822";
+    const APP_VERSION = "v1.5b.20260824";
     const TEAM_NAME = "PANATHINAIKOS AKTOR ATHENS";
 
     // --- 1. ΒΟΗΘΗΤΙΚΕΣ ΣΥΝΑΡΤΗΣΕΙΣ ---
@@ -130,7 +130,7 @@
               </button>
             </div>
             
-            <div className="p-8 text-center space-y-4">
+            <div className="p-6 text-center space-y-4">
               <div className="text-2xl font-extrabold text-gray-800">
                 George Petrakis
               </div>
@@ -139,7 +139,25 @@
               </div>
             </div>
 
-            <div className="p-4 bg-gray-50 text-center">
+            <div className="px-6 pb-6">
+              <div className="bg-gray-50 border border-gray-100 rounded-xl p-4 text-left space-y-3 shadow-inner">
+                <h3 className="text-sm font-bold text-gray-700 flex items-center gap-2">
+                  <span>📱</span> Εγκατάσταση ως App
+                </h3>
+                <div className="text-sm text-gray-600 space-y-2 leading-relaxed">
+                  <p className="flex items-start gap-2">
+                    <span className="shrink-0 mt-0.5">🍎</span>
+                    <span><strong>iPhone (Safari):</strong> Πατήστε το εικονίδιο <ShareIcon className="inline-block w-4 h-4 mx-0.5 align-text-bottom text-blue-500" /> <em>Κοινοποίησης</em> και έπειτα «Προσθήκη στην οθόνη αφετηρίας».</span>
+                  </p>
+                  <p className="flex items-start gap-2">
+                    <span className="shrink-0 mt-0.5">🤖</span>
+                    <span><strong>Android (Chrome):</strong> Πατήστε τις <strong>⋮</strong> (3 τελείες) στο μενού και έπειτα «Προσθήκη στην αρχική οθόνη».</span>
+                  </p>
+                </div>
+              </div>
+            </div>
+
+            <div className="p-4 bg-gray-100 text-center border-t border-gray-200">
               <button 
                 onClick={onClose}
                 className="w-full py-2.5 px-4 font-medium text-white transition-colors bg-gray-800 rounded-lg hover:bg-gray-900"
