@@ -51,7 +51,7 @@
   <script type="text/babel">
     const { useState, useMemo } = React;
 
-    const APP_VERSION = "v1.6b.20260902";
+    const APP_VERSION = "v1.7b.20260902";
     const TEAM_NAME = "PANATHINAIKOS AKTOR ATHENS";
 
     // --- 1. ΒΟΗΘΗΤΙΚΕΣ ΣΥΝΑΡΤΗΣΕΙΣ ---
@@ -282,9 +282,9 @@
             ))}
           </div>
 
-          <div className="grid grid-cols-7 gap-2">
+          <div className="grid grid-cols-7 gap-2 lg:gap-3">
             {blanks.map((blank) => (
-              <div key={`blank-${blank}`} className="w-8 h-8 md:w-10 md:h-10"></div>
+            <div key={`blank-${blank}`} className="w-8 h-8 md:w-10 md:h-10"></div>
             ))}
 
             {days.map((day) => {
@@ -374,7 +374,7 @@
       return (
         <div>
           <header className="sticky top-0 z-30 px-4 py-6 bg-white/80 border-b border-gray-100 backdrop-blur-md shadow-sm">
-            <div className="max-w-7xl mx-auto flex items-center justify-between">
+            <div className="max-w-screen-2xl mx-auto flex items-center justify-between">
               <div className="flex items-center gap-3">
                 <div className="p-2 bg-green-700 text-white rounded-xl shadow-sm">
                   <TrophyIcon className="w-6 h-6" />
@@ -429,7 +429,7 @@
             </div>
           </header>
 
-          <main className="max-w-7xl mx-auto px-4 py-12">
+          <main className="max-w-screen-2xl mx-auto px-4 py-12">
             <div className="mb-8 text-center max-w-2xl mx-auto">
               <h2 className="text-3xl font-bold text-gray-900 mb-4">Επίσημο Ημερολόγιο</h2>
               <p className="text-gray-600 mb-6">
@@ -449,7 +449,7 @@
               </div>
             </div>
 
-            <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
+            <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3 2xl:grid-cols-4">
               {monthsToRender.map((m, index) => (
                 <MonthView
                   key={index}
